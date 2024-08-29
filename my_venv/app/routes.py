@@ -1,4 +1,5 @@
 from flask import Flask, Blueprint, render_template, request, jsonify, abort
+import json
 ## from .models import MyModel
 
 main = Blueprint('main', __name__)
@@ -36,7 +37,7 @@ def get_item(item_id):
     return jsonify(item), 200
 
 # get all items
-@main.route('/api/items/<int:item_id>', methods=['GET'])
+@main.route('/api/items', methods=['GET'])
 def get_items():
     data = load_data()
     return jsonify(data), 200
@@ -44,7 +45,7 @@ def get_items():
 # Update - update existing item by id
 @main.route('/api/items/<int:item_id>', methods=['PUT'])
 def update_item(item_id):
-    data = load_data
+    data = load_data()
     item = next((item for item in data if item['id'] == item_id), None)
     if item is None:
         abort(404)
