@@ -1,21 +1,23 @@
+import os
+import sqlite3
 from flask import Flask
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
 from .views import views
 from .auth import auth
+from .db_setup import create_database, insert_dummy_data
 
-## db = SQLAlchemy()
-migrate = Migrate()
+
+DB_NAME = "ScamDetectorDB.db"
 
 def create_app():
     app = Flask(__name__)
 
-    # config settings
+    # Create the SQLite database and tables if they don't exist
+    if not os.path.exists(DB_NAME):
+        create_database()
+        insert_dummy_data()
+    
+    # Config settings
     app.config.from_object('config.Config')
-
-    # Initialize extensions
-    ## db.init_app(app)
-    ## migrate.init_app(app, db)
 
     # Register blueprints
     from .routes import main
@@ -25,3 +27,7 @@ def create_app():
     app.register_blueprint(auth, url_prefix='/')
 
     return app
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True)
