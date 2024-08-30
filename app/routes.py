@@ -197,7 +197,7 @@ def get_user(user_id):
     cur = conn.cursor()
 
     cur.execute('SELECT username, email, points, created_at, updated_at FROM Users WHERE user_id = ?', (user_id,))
-    user = cur.fetchall()
+    user = cur.fetchone()
 
     if user is None:
         conn.close()
@@ -223,7 +223,7 @@ def update_userDetails(user_id):
     cur = conn.cursor()
     
     cur.execute('SELECT username, email, updated_at FROM Users WHERE user_id = ?', (user_id,))
-    user = cur.fetchall()
+    user = cur.fetchone()
     
     if user is None:
         conn.close()
