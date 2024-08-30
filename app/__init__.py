@@ -62,12 +62,14 @@ def create_database():
         FOREIGN KEY (template_id) REFERENCES ScamTemplates(template_id) ON DELETE CASCADE
     )
     ''')
-    
+
+    # Modified CommunityPosts table to include a title column
     cur.execute('''
     CREATE TABLE IF NOT EXISTS CommunityPosts (
         post_id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         screenshot_id INTEGER,
+        title TEXT NOT NULL,
         content TEXT NOT NULL,
         category TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -76,7 +78,7 @@ def create_database():
         FOREIGN KEY (screenshot_id) REFERENCES Screenshots(screenshot_id) ON DELETE SET NULL
     )
     ''')
-    
+
     cur.execute('''
     CREATE TABLE IF NOT EXISTS Comments (
         comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -115,6 +117,7 @@ def create_database():
     con.commit()
     con.close()
 
+
 def insert_dummy_data():
     # Establish connection to SQLite database
     con = sqlite3.connect(DB_NAME)
@@ -133,9 +136,9 @@ def insert_dummy_data():
     cur.execute('''
     INSERT INTO Screenshots (user_id, image_path, analyzed_text, scam_status, analysis_result)
     VALUES
-    (1, '/path/to/screenshot1.png', 'Dear user, you have won $1,000,000. Click here to claim your prize.', 'RED', 'Suspicious links and foreign address detected.'),
-    (2, '/path/to/screenshot2.png', 'Your package has been shipped. Track it here.', 'GREEN', 'No suspicious elements detected.'),
-    (3, '/path/to/screenshot3.png', 'You are eligible for a tax refund. Provide your bank details.', 'RED', 'Foreign address and request for sensitive information detected.')
+    (1, '/images/lottery.png', 'Dear user, you have won $1,000,000. Click here to claim your prize.', 'RED', 'Suspicious links and foreign address detected.'),
+    (2, '/images/package.jpeg', 'Your package has been shipped. Track it here.', 'GREEN', 'No suspicious elements detected.'),
+    (3, '/images/iras.jpg', 'You are eligible for a tax refund. Provide your bank details.', 'RED', 'Foreign address and request for sensitive information detected.')
     ''')
 
     # Insert data into ScamTemplates table
@@ -156,14 +159,17 @@ def insert_dummy_data():
     (3, 3, 90.00)
     ''')
 
-    # Insert data into CommunityPosts table
+   # Insert data into CommunityPosts table with longer content and a title
     cur.execute('''
-    INSERT INTO CommunityPosts (user_id, screenshot_id, content, category)
+    INSERT INTO CommunityPosts (user_id, screenshot_id, title, content, category)
     VALUES
-    (1, 1, 'Watch out for this scam message claiming you have won a lottery!', 'Scam Alert'),
-    (2, NULL, 'Is it safe to click on links in text messages from unknown numbers?', 'Discussion'),
-    (3, 3, 'I received a message about a tax refund. Should I be concerned?', 'Scam Alert')
+    (1, 1, 'Lottery Scam Warning', 'Watch out for this scam message claiming you have won a lottery! This kind of message is a common tactic used by scammers to lure people into giving away their personal information. They often promise a huge prize but will ask you to provide sensitive information or pay a fee to claim it. Always be skeptical of such messages, especially if they come from unknown sources.', 'Scam Alert'),
+    (2, NULL, 'Suspicious Bank Message', 'Is it safe to click on links in text messages from unknown numbers? I received a message that looks like it might be from my bank, but the URL is unfamiliar. I’m hesitant to click on it because I’ve heard about phishing scams. Does anyone have advice on how to verify if a link is safe?', 'Discussion'),
+    (3, 3, 'Tax Refund Scam Concern', 'I received a message about a tax refund. Should I be concerned? The message states that I am eligible for a tax refund and asks me to provide my bank details to process the refund. It looks legitimate, but I am wary because I know there are many scams related to taxes. Has anyone encountered something similar?', 'Scam Alert'),
+    (1, NULL, 'IRS Phone Scam', 'Received a call claiming to be from the IRS demanding immediate payment. They said I owed back taxes and that I would be arrested if I didn’t pay right away. I’ve never heard of the IRS operating this way, but it was very intimidating. Does anyone know if this is a known scam?', 'Scam Alert'),
+    (2, 2, 'Shipped Package', 'Has anyone else received a suspicious text or email about a package delivery? I got a message this morning claiming that a package is waiting for me, but the link they provided looks really suspicious. It said I needed to click to arrange for redelivery or confirm my address, but I’m not expecting any packages. I''ve heard this could be a scam where they trick you into providing personal information or even install malware on your device. Be careful!', 'Scam Alert')
     ''')
+
 
     # Insert data into Comments table
     cur.execute('''

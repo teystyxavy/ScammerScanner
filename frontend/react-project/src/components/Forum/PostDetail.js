@@ -1,6 +1,9 @@
 import React from 'react';
 
 function PostDetail({ post, onClose }) {
+  // Extract necessary fields from the post object
+  const { post: postDetails, user, screenshot } = post;
+
   return (
     <article className="w-full max-w-3xl mx-auto px-4">
       <button 
@@ -14,25 +17,27 @@ function PostDetail({ post, onClose }) {
       </button>
       
       <header className="mb-8">
-        <h1 className="text-5xl font-bold text-gray-900 mb-4">{post.title}</h1>
+        <h1 className="text-5xl font-bold text-gray-900 mb-4">{postDetails?.title || "No Title"}</h1>
         <p className="text-gray-600">
-          <span className="font-medium">Posted By:</span> {post.author}
+          <span className="font-medium">Posted By:</span> {user?.username || "Anonymous"}
         </p>
       </header>
       
-      <figure className="mb-8">
-        <img 
-          src={post.imageUrl} 
-          alt={post.title} 
-          className="w-full h-auto max-w-sm mx-auto rounded-lg"
-        />
-        <figcaption className="text-sm text-gray-500 mt-2 text-center">
-          {post.title}
-        </figcaption>
-      </figure>
+      {screenshot && (
+        <figure className="mb-8">
+          <img 
+            src={screenshot.image_path} 
+            alt={postDetails?.title || "No Title"} 
+            className="w-full h-auto max-w-sm mx-auto rounded-lg"
+          />
+          <figcaption className="text-sm text-gray-500 mt-2 text-center">
+            {postDetails?.title || "No Title"}
+          </figcaption>
+        </figure>
+      )}
       
       <section className="prose prose-lg max-w-none">
-        <p>{post.fullContent}</p>
+        <p>{postDetails?.content || "No Content Available"}</p>
       </section>
     </article>
   );
