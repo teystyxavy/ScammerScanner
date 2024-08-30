@@ -4,10 +4,14 @@ from flask_sqlalchemy import SQLAlchemy
 from .views import views
 from .auth import auth
 from os import path
+#import sqlite3
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
+#con = sqlite3.connect("database.db")
+#cur = con.cursor()
 
+#cur.exectute("CREATE TABLE USER(id, password, )")
 ##migrate = Migrate()
 
 def create_app():
