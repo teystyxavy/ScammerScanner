@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from .views import views
+from .auth import auth
 
 ## db = SQLAlchemy()
 migrate = Migrate()
@@ -18,5 +20,8 @@ def create_app():
     # Register blueprints
     from .routes import main
     app.register_blueprint(main)
+
+    app.register_blueprint(views, url_prefix='/')
+    app.register_blueprint(auth, url_prefix='/')
 
     return app
