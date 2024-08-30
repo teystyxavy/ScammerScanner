@@ -27,7 +27,6 @@ function App() {
             <Route path="/forum" element={<Forum />} />
             <Route path="/rewards" element={<Contact />} />
           </Routes>	
-          <h1 className="text-green-400">hello</h1>
           <footer></footer>
         </div>
       </div>
