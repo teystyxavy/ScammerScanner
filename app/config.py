@@ -5,3 +5,4 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'mysql://username:password@localhost/db_name'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TESSERACT_PATH = os.environ.get('TESSERACT_PATH')
+    VT_API_KEY = os.environ.get('VT_API_KEY')
