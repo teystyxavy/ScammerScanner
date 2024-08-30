@@ -1,12 +1,10 @@
 import re
-import language_tool_python
 from app.services import VirusTotalService
 from spellchecker import SpellChecker
 
 class ScamFirstCheckService:
     def __init__(self, text:str) -> None:
         self.spell_checker = SpellChecker()
-        self.grammar_checker = language_tool_python.LanguageTool('en-US')
 
         punctuation_regex = r'[,.:!+-]'
         email_regex = r'[a-zA-Z0-9._]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
