@@ -218,7 +218,7 @@ def get_user(user_id):
 # updates username, eail and updated_at for specific user_id
 # doesn't update points, password & created_at
 @main.route('/api/user/<int:user_id>', methods=['PUT'])
-def update_post(user_id):
+def update_userDetails(user_id):
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -243,7 +243,7 @@ def update_post(user_id):
 
 # Update - Update a user's password
 @main.route('/api/password/<int:user_id>', methods=['PUT'])
-def update_post(user_id):
+def update_userPassword(user_id):
     conn = get_db_connection()
     cur = conn.cursor()
     
