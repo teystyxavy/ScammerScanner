@@ -20,8 +20,9 @@ function Login() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('user', JSON.stringify({ username }));
+        const userData = await response.json();
+        localStorage.setItem('isLogged', "true");
+        
         // Force re-render by updating state or causing side effect
         window.dispatchEvent(new Event('storage'));
         

@@ -29,7 +29,7 @@ function Register() {
       if (response.ok) {
         // Optionally, you could log in the user directly after registration
         const data = await response.json();
-        localStorage.setItem('user', JSON.stringify({ username }));
+        localStorage.setItem('isLogged', "true");
         window.dispatchEvent(new Event('storage'));
         navigate('/'); // Redirect to home after successful registration
       } else {
