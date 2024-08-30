@@ -19,9 +19,6 @@ function App() {
 	function handleFileReset() {
 		setFile(null);
 	}
-	function handleFileReset() {
-		setFile(null);
-	}
 
 	return (
 		<Router>
