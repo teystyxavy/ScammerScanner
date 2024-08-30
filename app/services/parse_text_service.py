@@ -1,11 +1,11 @@
 from PIL import Image
-from app import config
+from app.config import Config
 import pytesseract
 import cv2
 
 class ParseTextService:
     def __init__(self) -> None:
-        pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
+        pytesseract.pytesseract.tesseract_cmd = Config.TESSERACT_PATH
         pass
 
     def load_image(self, image_path:str) -> Image:
