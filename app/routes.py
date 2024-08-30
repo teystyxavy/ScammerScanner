@@ -189,6 +189,84 @@ def delete_post(post_id):
     
     return '', 204
 
+
+# Get - Get a user details for profile page
+@main.route('/api/user/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute('SELECT username, email, points, created_at, updated_at FROM Users WHERE user_id = ?', (user_id,))
+    user = cur.fetchall()
+
+    if user is None:
+        conn.close()
+        abort(404)
+
+    # put user details from row into dict
+    user_dict = {
+        "username": user["username"],
+        "email": user["email"],
+        "points": user["points"],
+        "created_at": user["created_at"],
+        "updated_at": user["updated_at"]
+    }
+
+    return jsonify(user_dict), 200
+
+# Update - Update a user details for profile page
+# updates username, eail and updated_at for specific user_id
+# doesn't update points, password & created_at
+@main.route('/api/user/<int:user_id>', methods=['PUT'])
+def update_post(user_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute('SELECT username, email, updated_at FROM Users WHERE user_id = ?', (user_id,))
+    user = cur.fetchall()
+    
+    if user is None:
+        conn.close()
+        abort(404)
+    
+    updated_user = request.json
+    cur.execute('''
+        UPDATE Users SET username = ?, email = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ?
+    ''', (updated_user['username'], updated_user('email'), updated_user('user_id')))
+    
+    conn.commit()
+    conn.close()
+    
+    updated_user['user_id'] = user_id
+    return jsonify(updated_user), 200
+
+# Update - Update a user's password
+@main.route('/api/password/<int:user_id>', methods=['PUT'])
+def update_post(user_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute('SELECT password, updated_at FROM Users WHERE user_id = ?', (user_id,))
+    user = cur.fetchone()
+    
+    if user is None:
+        conn.close()
+        abort(404)
+    
+    updated_user = request.json
+    cur.execute('''
+        UPDATE Users SET password = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ?
+    ''', (updated_user['password'], updated_user('user_id')))
+    
+    conn.commit()
+    conn.close()
+    
+    updated_user['user_id'] = user_id
+    return jsonify(updated_user), 200
+
+
 # Create - Add new item
 @main.route('/api/items', methods=['POST'])
 def create_item():
