@@ -4,7 +4,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./components/Scanner/HomePage";
 import NavBar from "./components/NavBar";
 import Forum from "./components/Forum/Forum";
-import Rewards from "./components/Rewards"; // Renamed from Contact to Rewards
+import Login from "./components/Login";
+import Register from "./components/Register";
+import Rewards from "./components/Rewards";
 import FileDisplay from "./components/Scanner/FileDisplay";
 import Result from "./components/Scanner/Result";
 import Loading from "./components/Scanner/Loading";
@@ -47,6 +49,8 @@ function App() {
 						/>
 						<Route path="/forum" element={<Forum />} />
 						<Route path="/rewards" element={<Rewards />} />
+						<Route path="/login" element={<Login />} />
+						<Route path="/register" element={<Register />} />
 					</Routes>
 					<footer></footer>
 				</div>
