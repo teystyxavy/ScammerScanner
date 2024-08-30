@@ -1,8 +1,8 @@
 import os
-import sqlite3
 from flask import Flask
 from .views import views
 from .db_setup import create_database, insert_dummy_data
+from config import Config
 
 
 DB_NAME = "ScamDetectorDB.db"
@@ -16,7 +16,7 @@ def create_app():
         insert_dummy_data()
     
     # Config settings
-    app.config.from_pyfile('config.py')
+    app.config.from_object(Config)
 
     # Register blueprints
     from .routes import main

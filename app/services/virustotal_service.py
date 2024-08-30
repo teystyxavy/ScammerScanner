@@ -1,6 +1,6 @@
 import requests
 import time
-from app.config import Config
+from config import Config
 
 class VirusTotalService:
     def __init__(self):

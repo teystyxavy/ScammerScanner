@@ -7,8 +7,8 @@ function NavBar() {
 
   useEffect(() => {
     const checkLoginStatus = () => {
-      const user = localStorage.getItem("user");
-      if (user) {
+      const isLogged = localStorage.getItem("isLogged");
+      if (isLogged) {
         setIsLoggedIn(true);
       } else {
         setIsLoggedIn(false);
