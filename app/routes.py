@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, render_template, request, jsonify, abort
+from flask import Blueprint, request, jsonify, session, abort
 import json
 import sqlite3
 ## from .models import MyModel
@@ -266,57 +266,67 @@ def update_userPassword(user_id):
     updated_user['user_id'] = user_id
     return jsonify(updated_user), 200
 
+# Register endpoint
+@main.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
 
-# Create - Add new item
-@main.route('/api/items', methods=['POST'])
-def create_item():
-    data = load_data()
-    new_item = request.json
-    new_item['id'] = max(item['id'] for item in data) + 1 if data else 1
-    data.append(new_item)
-    save_data(data)
-    return jsonify(new_item), 201
+    if not username or not email or not password:
+        return jsonify({"error": "Please provide username, email, and password"}), 400
 
-# Read - get all items or specific item by ID
-# specific item
-@main.route('/api/items/<int:item_id>', methods=['GET'])
-def get_item(item_id):
-    data = load_data()
-    item = next((item for item in data if item['id'] == item_id), None)
-    if item is None:
-        abort(404)
-    return jsonify(item), 200
+    conn = get_db_connection()
+    cur = conn.cursor()
 
-# get all items
-@main.route('/api/items', methods=['GET'])
-def get_items():
-    data = load_data()
-    return jsonify(data), 200
+    # Check if the username or email already exists
+    cur.execute('SELECT * FROM Users WHERE username = ? OR email = ?', (username, email))
+    existing_user = cur.fetchone()
 
-# Update - update existing item by id
-@main.route('/api/items/<int:item_id>', methods=['PUT'])
-def update_item(item_id):
-    data = load_data()
-    item = next((item for item in data if item['id'] == item_id), None)
-    if item is None:
-        abort(404)
-    
-    updated_item = request.json
-    item.update(updated_item)
-    save_data(data)
-    return jsonify(item), 200
+    if existing_user:
+        conn.close()
+        return jsonify({"error": "Username or email already exists"}), 400
 
-# Delete - Remove an item by ID
-@main.route('/api/items/<int:item_id>', methods=['DELETE'])
-def delete_item(item_id):
-    data = load_data()
-    item = next((item for item in data if item['id'] == item_id), None)
-    if item is None:
-        abort(404)
+    # Insert the new user into the database without hashing the password
+    cur.execute('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)', 
+                (username, email, password))
+    conn.commit()
+    conn.close()
 
-    data.remove(item)
-    save_data(data)
-    return '', 204
+    return jsonify({"message": "User registered successfully"}), 201
 
-### error 404 is not found, error 200 is OK, error 204 means OK and return nothing.
+# Login endpoint
+@main.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return jsonify({"error": "Please provide username and password"}), 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Find the user by username
+    cur.execute('SELECT * FROM Users WHERE username = ?', (username,))
+    user = cur.fetchone()
+    conn.close()
+
+    if not user or user['password'] != password:
+        return jsonify({"error": "Invalid username or password"}), 401
+
+    # If the user is authenticated, start a session
+    session['user_id'] = user['user_id']
+    session['username'] = user['username']
+
+    return jsonify({"message": "Logged in successfully"}), 200
+
+# Logout endpoint
+@main.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user_id', None)
+    session.pop('username', None)
+    return jsonify({"message": "Logged out successfully"}), 200
 

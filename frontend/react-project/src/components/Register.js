@@ -9,18 +9,36 @@ function Register() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
 
-    // Simple validation example
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    // Example: Save user data to localStorage (replace with real sign-up logic)
-    localStorage.setItem("user", JSON.stringify({ username, email }));
-    navigate("/"); // Redirect to home after sign up
+    try {
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      if (response.ok) {
+        // Optionally, you could log in the user directly after registration
+        const data = await response.json();
+        localStorage.setItem('user', JSON.stringify({ username }));
+        window.dispatchEvent(new Event('storage'));
+        navigate('/'); // Redirect to home after successful registration
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again later.');
+    }
   };
 
   return (

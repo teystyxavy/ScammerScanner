@@ -7,6 +7,7 @@ import Forum from "./components/Forum/Forum";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Rewards from "./components/Rewards";
+import Profile from "./components/Profile";
 import FileDisplay from "./components/Scanner/FileDisplay";
 import Result from "./components/Scanner/Result";
 import Loading from "./components/Scanner/Loading";
@@ -51,6 +52,7 @@ function App() {
 						<Route path="/rewards" element={<Rewards />} />
 						<Route path="/login" element={<Login />} />
 						<Route path="/register" element={<Register />} />
+						<Route path="/profile" element={<Profile />} />
 					</Routes>
 					<footer></footer>
 				</div>

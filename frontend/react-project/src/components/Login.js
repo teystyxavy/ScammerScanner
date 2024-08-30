@@ -7,15 +7,31 @@ function Login() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     
-    // Example of simple authentication check (replace with real authentication logic)
-    if (username === "admin" && password === "password") {
-      localStorage.setItem("user", JSON.stringify({ username }));
-      navigate("/"); // Redirect to home after login
-    } else {
-      setError("Invalid username or password");
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('user', JSON.stringify({ username }));
+        // Force re-render by updating state or causing side effect
+        window.dispatchEvent(new Event('storage'));
+        
+        navigate('/'); // Redirect to home after login
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Invalid username or password');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again later.');
     }
   };
 
