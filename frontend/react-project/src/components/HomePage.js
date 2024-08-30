@@ -1,7 +1,64 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 export default function HomePage(props) {
 	const { setAudioStream, setFile } = props;
+
+	const [recordingStatus, setRecordingStatus] = useState("inactive");
+	const [audioChunks, setAudioChunks] = useState([]);
+	const [duration, setDuration] = useState(0);
+
+	const mediaRecorder = useRef(null);
+
+	const mimeType = "audio/webm";
+
+	async function startRecording() {
+		let tempStream;
+
+		console.log("Start recording");
+
+		try {
+			const streamData = navigator.mediaDevices.getUserMedia({
+				audio: true,
+				video: false,
+			});
+
+			tempStream = streamData;
+		} catch (err) {
+			console.log(err.message);
+			return;
+		}
+
+		setRecordingStatus("recording");
+
+		// create new Media recorder instance using the stream
+		const media = new MediaRecorder(tempStream, { type: mimeType });
+		mediaRecorder.current = media;
+
+		mediaRecorder.current.start();
+		let localAudioChunks = [];
+		mediaRecorder.current.ondateavailable = (event) => {
+			if (typeof event.data === "undefined") {
+				return;
+			}
+			if (event.data.size === 0) {
+				return;
+			}
+			localAudioChunks.push(event.data);
+		};
+		setAudioChunks(localAudioChunks);
+	}
+
+	async function stopRecording() {
+		setRecordingStatus("inactive");
+		console.log("Stop recording");
+
+		mediaRecorder.current.stop();
+		mediaRecorder.current.onstop = () => {
+			const audioBlob = new Blob(audioChunks, { type: mimeType });
+			setAudioStream(audioBlob);
+			setAudioChunks([]);
+		};
+	}
 
 	return (
 		<main className="flex-1 p-4 flex flex-col gap-3 text-center sm:gap-4 md:gap-5 justify-center pb-20">
@@ -32,7 +89,7 @@ export default function HomePage(props) {
 				</label>{" "}
 				a mp3 file
 			</p>
-			<p className="italic text-slate-500">Free now free forever</p>
+			<p className="italic text-slate-400">Free now free forever</p>
 		</main>
 	);
 }
