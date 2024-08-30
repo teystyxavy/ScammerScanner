@@ -1,11 +1,12 @@
 import os
-import sqlite3
+
 from flask import Flask, jsonify, request
-from io import BytesIO
+import sqlite3
 from PIL import Image
 from app.services import *
 from .views import views
 from .db_setup import create_database, insert_dummy_data
+from app.config import Config
 
 app = Flask(__name__)
 DB_NAME = "ScamDetectorDB.db"
@@ -48,7 +49,7 @@ def create_app():
         insert_dummy_data()
     
     # Config settings
-    app.config.from_pyfile('config.py')
+    app.config.from_object(Config)
 
     # Register blueprints
     from .routes import main

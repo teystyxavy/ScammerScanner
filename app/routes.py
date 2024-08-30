@@ -217,54 +217,87 @@ def get_user(user_id):
 # Update - Update a user details for profile page
 # updates username, eail and updated_at for specific user_id
 # doesn't update points, password & created_at
+from flask import request, jsonify, abort, session
+
 @main.route('/api/user/<int:user_id>', methods=['PUT'])
 def update_userDetails(user_id):
     conn = get_db_connection()
     cur = conn.cursor()
-    
-    cur.execute('SELECT username, email, updated_at FROM Users WHERE user_id = ?', (user_id,))
+
+    # Fetch the current user details
+    cur.execute('SELECT username, email, password FROM Users WHERE user_id = ?', (user_id,))
     user = cur.fetchone()
-    
+
     if user is None:
         conn.close()
         abort(404)
-    
+
     updated_user = request.json
+    current_password = updated_user.get('currentPassword')
+
+    # Validate the current password
+    if not current_password or current_password != user['password']:
+        conn.close()
+        return jsonify({"error": "Incorrect password"}), 403
+
+    # Update the user details
     cur.execute('''
         UPDATE Users SET username = ?, email = ?, updated_at = CURRENT_TIMESTAMP
         WHERE user_id = ?
-    ''', (updated_user['username'], updated_user('email'), updated_user('user_id')))
+    ''', (updated_user['username'], updated_user['email'], user_id))
     
     conn.commit()
     conn.close()
-    
-    updated_user['user_id'] = user_id
+
+    # Return the updated user details (excluding password)
+    updated_user = {
+        'user_id': user_id,
+        'username': updated_user['username'],
+        'email': updated_user['email']
+    }
     return jsonify(updated_user), 200
 
+
 # Update - Update a user's password
-@main.route('/api/password/<int:user_id>', methods=['PUT'])
-def update_userPassword(user_id):
+@main.route('/api/password', methods=['PUT'])
+def update_userPassword():
+    # Get the current user_id from the session
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
     conn = get_db_connection()
     cur = conn.cursor()
     
-    cur.execute('SELECT password, updated_at FROM Users WHERE user_id = ?', (user_id,))
+    # Fetch the current password from the database
+    cur.execute('SELECT password FROM Users WHERE user_id = ?', (user_id,))
     user = cur.fetchone()
     
     if user is None:
         conn.close()
         abort(404)
     
+    # Extract the current password and new password from the request
     updated_user = request.json
+    current_password = updated_user.get('currentPassword')
+    new_password = updated_user.get('newPassword')
+    
+    # Validate the current password
+    if user['password'] != current_password:
+        conn.close()
+        return jsonify({"error": "Current password is incorrect"}), 403
+    
+    # Update the password with the new password
     cur.execute('''
         UPDATE Users SET password = ?, updated_at = CURRENT_TIMESTAMP
         WHERE user_id = ?
-    ''', (updated_user['password'], updated_user('user_id')))
+    ''', (new_password, user_id))
     
     conn.commit()
     conn.close()
     
-    updated_user['user_id'] = user_id
-    return jsonify(updated_user), 200
+    return jsonify({"message": "Password updated successfully"}), 200
 
 # Register endpoint
 @main.route('/register', methods=['POST'])
@@ -322,6 +355,26 @@ def login():
     session['username'] = user['username']
 
     return jsonify({"message": "Logged in successfully"}), 200
+
+@main.route('/api/current_user', methods=['GET'])
+def current_user():
+    if 'user_id' in session:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Fetch the user data from the database using the session user_id
+        cur.execute('SELECT * FROM Users WHERE user_id = ?', (session['user_id'],))
+        user = cur.fetchone()
+        conn.close()
+
+        if user:
+            return jsonify({
+                "user_id": user['user_id'],
+                "username": user['username'],
+                "email": user['email']
+            }), 200
+    
+    return jsonify({"error": "Not logged in"}), 401
 
 # Logout endpoint
 @main.route('/logout', methods=['POST'])
