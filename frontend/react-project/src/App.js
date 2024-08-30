@@ -6,9 +6,13 @@ import NavBar from "./components/NavBar";
 import Forum from "./components/Forum/Forum";
 import Rewards from "./components/Rewards"; // Renamed from Contact to Rewards
 import FileDisplay from "./components/Scanner/FileDisplay";
+import Result from "./components/Scanner/Result";
+import Loading from "./components/Scanner/Loading";
 
 function App() {
 	const [file, setFile] = useState(null);
+	const [output, setOutput] = useState(null);
+	const [loading, setLoading] = useState(false);
 
 	const isFileAvailable = file;
 
@@ -26,7 +30,11 @@ function App() {
 							path="/"
 							element={
 								<section className="min-h-screen flex flex-col">
-									{isFileAvailable ? (
+									{output ? (
+										<Result />
+									) : loading ? (
+										<Loading />
+									) : isFileAvailable ? (
 										<FileDisplay
 											handleFileReset={handleFileReset}
 											file={file}

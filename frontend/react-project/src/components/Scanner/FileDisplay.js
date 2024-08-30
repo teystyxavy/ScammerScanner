@@ -1,9 +1,32 @@
 import React from "react";
 
 export default function FileDisplay(props) {
+	const url = "/upload";
 	const { handleFileReset, file } = props;
 
-	// const file
+	const handleFileUpload = async () => {
+		if (!file) {
+			alert("No file selected");
+			return;
+		}
+
+		const formData = new FormData();
+		formData.append("file", file);
+
+		try {
+			const response = await fetch(url, {
+				method: "POST",
+				body: formData,
+			});
+
+			if (!response.ok) {
+				throw new Error("File upload failed");
+			}
+		} catch (error) {
+			console.error("Error uploading file: ", error);
+			alert("Error uploading file");
+		}
+	};
 
 	return (
 		<main className="flex-1 p-4 flex flex-col gap-3 text-center sm:gap-4 md:gap-5 justify-center pb-20 w-fit max-w-full mx-auto">
@@ -21,7 +44,10 @@ export default function FileDisplay(props) {
 				>
 					Reset
 				</button>
-				<button className="specialBtn px-3 p-2 rounded-lg text-blue-400 flex items-center gap-2 font-medium">
+				<button
+					onClick={handleFileUpload}
+					className="specialBtn px-3 p-2 rounded-lg text-blue-400 flex items-center gap-2 font-medium"
+				>
 					<p>Detect</p>
 					<i class="fa-solid fa-user-secret"></i>
 				</button>
