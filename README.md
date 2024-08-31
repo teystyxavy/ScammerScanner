@@ -121,4 +121,7 @@ scammerscanner/
 - **Participate in the Community**: Join discussions in the community forum, create new posts, comment, and like posts.
 - **Earn and Redeem Rewards**: Contribute to the platform and earn points to redeem exciting rewards.
 
+## Team
+Philip, Daniel, Bryan, Xavier, Teck Ren and Denxi
+
 ---
