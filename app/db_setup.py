@@ -87,6 +87,30 @@ def create_database():
         FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
     )
     ''')
+
+    cur.execute('''
+    CREATE TABLE IF NOT EXISTS Comments (
+        comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        comment_text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (post_id) REFERENCES CommunityPosts(post_id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    )
+    ''')
+
+    cur.execute('''
+    CREATE TABLE IF NOT EXISTS Likes (
+        like_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (post_id) REFERENCES CommunityPosts(post_id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    )
+    ''')
     
     cur.execute('''
     CREATE TABLE IF NOT EXISTS Rewards (
@@ -157,7 +181,7 @@ def insert_dummy_data():
     (3, 3, 90.00)
     ''')
 
-   # Insert data into CommunityPosts table with longer content and a title
+   # Insert data into CommunityPosts table
     cur.execute('''
     INSERT INTO CommunityPosts (user_id, screenshot_id, title, content, category)
     VALUES
@@ -168,14 +192,32 @@ def insert_dummy_data():
     (2, 2, 'Shipped Package', 'Has anyone else received a suspicious text or email about a package delivery? I got a message this morning claiming that a package is waiting for me, but the link they provided looks really suspicious. It said I needed to click to arrange for redelivery or confirm my address, but I’m not expecting any packages. I''ve heard this could be a scam where they trick you into providing personal information or even install malware on your device. Be careful!', 'Scam Alert')
     ''')
 
-
     # Insert data into Comments table
     cur.execute('''
     INSERT INTO Comments (post_id, user_id, comment_text)
     VALUES
     (1, 2, 'Thanks for the warning! I almost fell for it.'),
     (2, 1, 'Always be cautious. Never click on links from unknown senders.'),
-    (3, 1, 'Yes, that sounds like a phishing attempt. Be careful.')
+    (3, 1, 'Hm....')
+    ''')
+
+    # Insert data into Likes table
+    cur.execute('''
+    INSERT INTO Likes (post_id, user_id)
+    VALUES
+    (1, 2),
+    (1, 3),
+    (1, 4),
+    (2, 1),
+    (2, 3),
+    (3, 3),
+    (3, 4),
+    (3, 5),
+    (4, 1),
+    (4, 2),
+    (4, 3),
+    (5, 1),
+    (5, 2)
     ''')
 
     # Insert data into Rewards table

@@ -501,3 +501,147 @@ def claim_reward():
     conn.close()
 
     return jsonify({"message": "Reward claimed successfully"}), 200
+
+# Toggle Like in a Post
+@main.route('/api/posts/<int:post_id>/toggle_like', methods=['POST'])
+def toggle_like(post_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session['user_id']
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Check if the user has already liked the post
+    cur.execute('''
+        SELECT * FROM Likes WHERE post_id = ? AND user_id = ?
+    ''', (post_id, user_id))
+    existing_like = cur.fetchone()
+
+    if existing_like:
+        # If the user has already liked the post, remove the like
+        cur.execute('''
+            DELETE FROM Likes WHERE post_id = ? AND user_id = ?
+        ''', (post_id, user_id))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Like removed"}), 200
+    else:
+        # If the user hasn't liked the post, add the like
+        cur.execute('''
+            INSERT INTO Likes (post_id, user_id) VALUES (?, ?)
+        ''', (post_id, user_id))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Post liked"}), 201
+
+# Get Total Likes of a Post and if Post is liked by user
+@main.route('/api/posts/<int:post_id>/likes', methods=['GET'])
+def get_post_likes(post_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session['user_id']
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Query to count the number of likes for the specified post
+    cur.execute('''
+        SELECT COUNT(*) as likes_count FROM Likes WHERE post_id = ?
+    ''', (post_id,))
+    result = cur.fetchone()
+
+    # Query to check if the current user has liked the post
+    cur.execute('''
+        SELECT EXISTS(SELECT 1 FROM Likes WHERE post_id = ? AND user_id = ?) as is_liked
+    ''', (post_id, user_id))
+    user_liked = cur.fetchone()
+
+    conn.close()
+
+    if result:
+        return jsonify({
+            "post_id": post_id,
+            "likes_count": result['likes_count'],
+            "isLiked": bool(user_liked['is_liked'])  # Convert to boolean (will be False if user_liked['is_liked'] is 0)
+        }), 200
+    else:
+        return jsonify({"error": "Post not found"}), 404
+
+# Get all Comments of a Post
+@main.route('/api/posts/<int:post_id>/comments', methods=['GET'])
+def get_post_comments(post_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('''
+        SELECT Comments.comment_id, Comments.comment_text, Comments.created_at, 
+               Users.user_id, Users.username
+        FROM Comments
+        JOIN Users ON Comments.user_id = Users.user_id
+        WHERE Comments.post_id = ?
+        ORDER BY Comments.created_at ASC
+    ''', (post_id,))
+    
+    comments = cur.fetchall()
+    conn.close()
+
+    if comments:
+        comments_list = []
+        for comment in comments:
+            comments_list.append({
+                "comment_id": comment['comment_id'],
+                "comment_text": comment['comment_text'],
+                "created_at": comment['created_at'],
+                "user_id": comment['user_id'],
+                "username": comment['username']
+            })
+
+        return jsonify({"post_id": post_id, "comments": comments_list}), 200
+    else:
+        return jsonify({"error": "No comments found for this post"}), 404
+
+# Create new Comment
+@main.route('/api/posts/<int:post_id>/comments', methods=['POST'])
+def create_comment(post_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session['user_id']
+    comment_text = request.json.get('comment_text')
+
+    # Check if the comment text is provided
+    if not comment_text:
+        return jsonify({"error": "Comment text is required"}), 400
+
+    # Insert the new comment into the Comments table
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('''
+        INSERT INTO Comments (post_id, user_id, comment_text)
+        VALUES (?, ?, ?)
+    ''', (post_id, user_id, comment_text))
+    
+    conn.commit()
+    new_comment_id = cur.lastrowid
+
+    cur.execute('''
+        SELECT username FROM Users WHERE user_id = ?
+    ''', (user_id,))
+    user = cur.fetchone()
+
+    conn.close()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    new_comment = {
+        "comment_id": new_comment_id,
+        "post_id": post_id,
+        "user_id": user_id,
+        "username": user['username'],
+        "comment_text": comment_text
+    }
+
+    return jsonify(new_comment), 201
+
