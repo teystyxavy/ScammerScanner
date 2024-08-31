@@ -217,6 +217,8 @@ def get_user(user_id):
 # Update - Update a user details for profile page
 # updates username, eail and updated_at for specific user_id
 # doesn't update points, password & created_at
+from flask import request, jsonify, abort, session
+
 @main.route('/api/user/<int:user_id>', methods=['PUT'])
 def update_userDetails(user_id):
     conn = get_db_connection()
@@ -296,27 +298,6 @@ def update_userPassword():
     conn.close()
     
     return jsonify({"message": "Password updated successfully"}), 200
-
-# Get User Points
-@main.route('/api/user/points', methods=['GET'])
-def get_user_points():
-    if 'user_id' not in session:
-        return jsonify({"error": "User not logged in"}), 401
-    
-    user_id = session['user_id']
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    # Query to get the user's points
-    cur.execute('SELECT points FROM Users WHERE user_id = ?', (user_id,))
-    user = cur.fetchone()
-    conn.close()
-
-    if user is None:
-        return jsonify({"error": "User not found"}), 404
-
-    points = user['points']
-    return jsonify({"points": points}), 200
 
 # Register endpoint
 @main.route('/register', methods=['POST'])

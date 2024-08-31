@@ -1,5 +1,5 @@
 from PIL import Image
-from config import Config
+from app.config import Config
 import pytesseract
 import cv2
 
