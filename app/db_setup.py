@@ -93,10 +93,12 @@ def create_database():
         reward_id INTEGER PRIMARY KEY AUTOINCREMENT,
         reward_name TEXT NOT NULL,
         points_required INTEGER NOT NULL,
+        image_url TEXT,  -- New column for storing the image path or URL
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
+
     
     cur.execute('''
     CREATE TABLE IF NOT EXISTS User_Rewards (
@@ -123,9 +125,9 @@ def insert_dummy_data():
     cur.execute('''
     INSERT INTO Users (username, email, password, points)
     VALUES 
-    ('john_doe', 'john@example.com', 'password123', 100),
-    ('jane_smith', 'jane@example.com', 'password123', 150),
-    ('michael_brown', 'michael@example.com', 'password123', 200)
+    ('john', 'john@gmail.com', 'pass', 1640),
+    ('bryan', 'bryan@gmail.com', 'pass', 530),
+    ('elle', 'elle@gmail.com', 'pass', 200)
     ''')
 
     # Insert data into Screenshots table
@@ -178,12 +180,20 @@ def insert_dummy_data():
 
     # Insert data into Rewards table
     cur.execute('''
-    INSERT INTO Rewards (reward_name, points_required)
+    INSERT INTO Rewards (reward_name, points_required, image_url)
     VALUES
-    ('10% Discount Voucher', 100),
-    ('Free Shipping Voucher', 150),
-    ('Amazon Gift Card $10', 200)
+    ('NTUC $5 Voucher', 100, '/rewards/ntuc.png'),
+    ('NTUC $10 Voucher', 275, '/rewards/ntuc.png'),
+    ('Amazon Gift Card $10', 250, '/rewards/amazon.jpeg'),
+    ('Starbucks Gift Card $5', 100, '/rewards/starbucks.jpeg'),
+    ('Apple Music 1 Month', 250, '/rewards/applemusic.png'),
+    ('Google Play Gift Card $10', 200, '/rewards/google.png'),
+    ('Netflix Gift Card $20', 400, '/rewards/netflix.jpeg'),
+    ('Spotify Premium 1 Month', 250, '/rewards/spotify.png'),
+    ('Grab Voucher $5', 100, '/rewards/grab.png'),
+    ('H&M Gift Card $25', 500, '/rewards/hm.jpeg')
     ''')
+
 
     # Insert data into User_Rewards table
     cur.execute('''
