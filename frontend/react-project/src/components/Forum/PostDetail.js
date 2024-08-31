@@ -89,7 +89,7 @@ function PostDetail({ post, onClose }) {
         const addedComment = await response.json();
         setComments([...comments, addedComment]);
         setNewComment('');
-        setErrorMessage(''); // Clear the error message on successful comment submission
+        setErrorMessage('');
       } else {
         setErrorMessage('Failed to add comment.');
       }

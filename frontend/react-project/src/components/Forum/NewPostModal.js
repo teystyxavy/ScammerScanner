@@ -21,7 +21,6 @@ function NewPostModal({ isOpen, onClose, onPostCreated }) {
     }
 
     try {
-      // Create the new post
       const response = await fetch("/api/posts", {
         method: "POST",
         body: formData,

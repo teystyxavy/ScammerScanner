@@ -23,10 +23,9 @@ function Login() {
 				const userData = await response.json();
 				localStorage.setItem("isLogged", "true");
 
-				// Force re-render by updating state or causing side effect
 				window.dispatchEvent(new Event("storage"));
 
-				navigate("/"); // Redirect to home after login
+				navigate("/");
 			} else {
 				const errorData = await response.json();
 				setError(errorData.error || "Invalid username or password");

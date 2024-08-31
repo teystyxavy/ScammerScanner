@@ -6,21 +6,19 @@ function Rewards() {
   const [userPoints, setUserPoints] = useState(0);
   const navigate = useNavigate();
 
-  // Check if user is logged in
   useEffect(() => {
     const isLogged = localStorage.getItem('isLogged');
     if (!isLogged) {
-      navigate('/login'); // Redirect to login if not logged in
+      navigate('/login');
     }
   }, [navigate]);
 
-  // Fetch user points and rewards from the backend API
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const pointsResponse = await fetch('/api/user/points', {
           method: 'GET',
-          credentials: 'include', // Include session cookies
+          credentials: 'include',
         });
 
         if (pointsResponse.ok) {
@@ -45,9 +43,7 @@ function Rewards() {
     fetchUserData();
   }, []);
 
-  // Handle redeeming a reward
   const handleRedeem = async (reward_id) => {
-    // Disable the button immediately
     const updatedRewards = rewards.map(reward => 
       reward.reward_id === reward_id ? { ...reward, isRedeeming: true } : reward
     );
@@ -60,18 +56,16 @@ function Rewards() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ reward_id }),
-        credentials: 'include', // Include session cookies
+        credentials: 'include',
       });
   
       if (response.ok) {
         const data = await response.json();
-        alert(data.message);  // Notify user of successful claim
+        alert(data.message);
         
-        // Update user points after redeeming
         const updatedUserPoints = userPoints - rewards.find(reward => reward.reward_id === reward_id).points_required;
         setUserPoints(updatedUserPoints);
   
-        // Remove the redeemed reward from the list or update its status
         setRewards(rewards => rewards.filter(reward => reward.reward_id !== reward_id));
       } else {
         const errorData = await response.json();
@@ -80,7 +74,6 @@ function Rewards() {
     } catch (error) {
       alert('Something went wrong while claiming the reward.');
     } finally {
-      // Re-enable the button regardless of the outcome
       const resetRewards = rewards.map(reward => 
         reward.reward_id === reward_id ? { ...reward, isRedeeming: false } : reward
       );
@@ -166,8 +159,8 @@ function Rewards() {
 
   const lockedButtonStyle = {
     ...redeemButtonStyle,
-    backgroundColor: '#999', // Grey color for the locked button
-    cursor: 'not-allowed', // Change cursor to indicate the button is not clickable
+    backgroundColor: '#999',
+    cursor: 'not-allowed',
   };
 
   return (
@@ -180,7 +173,7 @@ function Rewards() {
       {rewards.map((reward) => (
   <div key={reward.reward_id} style={cardStyle}>
     <img src={reward.image_url} alt={reward.reward_name} style={imageStyle} />
-    <div style={categoryStyle}>{reward.category}</div> {/* Assuming 'category' is available */}
+    <div style={categoryStyle}>{reward.category}</div>
     <div style={nameStyle}>{reward.reward_name}</div>
     <div style={pointsRequiredStyle}>{reward.points_required} pts</div>
     {userPoints >= reward.points_required ? (
