@@ -1,14 +1,37 @@
 import React, { useState, useEffect } from "react";
 import PostCard from "./PostCard";
 import PostDetail from "./PostDetail";
-import NewPostModal from "./NewPostModal"; // Import the new modal component
+import NewPostModal from "./NewPostModal";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 function Forum() {
-	const [posts, setPosts] = useState([]);
+	const [posts, setPosts] = useState([]); // Initialize posts as an empty array
 	const [selectedPost, setSelectedPost] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
-	const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [user, setUser] = useState(null);
+
+	useEffect(() => {
+		// Fetch current user data
+		const fetchUser = async () => {
+			try {
+				const response = await fetch("/api/current_user", {
+					credentials: "include",
+				});
+				if (response.ok) {
+					const userData = await response.json();
+					setUser(userData);
+				} else {
+					console.error("Failed to fetch user data");
+				}
+			} catch (error) {
+				console.error("Error fetching user data:", error);
+			}
+		};
+
+		fetchUser();
+	}, []);
 
 	useEffect(() => {
 		const fetchPosts = async () => {
@@ -18,7 +41,8 @@ function Forum() {
 					throw new Error("Failed to fetch posts");
 				}
 				const data = await response.json();
-				setPosts(data);
+				const updatedPosts = await fetchLikesCounts(data);
+				setPosts(updatedPosts);
 				setLoading(false);
 			} catch (error) {
 				setError(error.message);
@@ -28,6 +52,36 @@ function Forum() {
 
 		fetchPosts();
 	}, []);
+
+	// Fetch likes count and isLiked status for each post
+	const fetchLikesCounts = async (posts) => {
+		const updatedPosts = await Promise.all(
+			posts.map(async (post) => {
+				const postId = post.post.post_id;
+				try {
+					const response = await fetch(`/api/posts/${postId}/likes`);
+					if (response.ok) {
+						const likesData = await response.json();
+						return {
+							...post,
+							likes_count: likesData.likes_count,
+							isLiked: likesData.isLiked,
+						};
+					} else {
+						console.error(`Failed to fetch likes count for post ${postId}`);
+						return { ...post, likes_count: 0, isLiked: false };
+					}
+				} catch (error) {
+					console.error(
+						`Error fetching likes count for post ${postId}:`,
+						error
+					);
+					return { ...post, likes_count: 0, isLiked: false };
+				}
+			})
+		);
+		return updatedPosts;
+	};
 
 	const handlePostClick = (post) => {
 		setSelectedPost(post);
@@ -50,9 +104,35 @@ function Forum() {
 		setIsModalOpen(false);
 	};
 
-	// Separate prominent (top 3) posts and remaining posts
-	const topPosts = posts.slice(0, 3);
-	const allPosts = posts.slice(3);
+	const toggleLike = async (postId) => {
+		try {
+			const response = await fetch(`/api/posts/${postId}/toggle_like`, {
+				method: "POST",
+				credentials: "include", // Include session cookies
+			});
+
+			if (response.ok) {
+				// Update the post's like count and liked status
+				setPosts((prevPosts) =>
+					prevPosts.map((post) =>
+						post.post.post_id === postId
+							? {
+									...post,
+									isLiked: !post.isLiked,
+									likes_count: post.isLiked
+										? post.likes_count - 1
+										: post.likes_count + 1,
+							  }
+							: post
+					)
+				);
+			} else {
+				console.error("Failed to toggle like");
+			}
+		} catch (error) {
+			console.error("Error toggling like:", error);
+		}
+	};
 
 	if (loading) {
 		return <div className="text-center">Loading...</div>;
@@ -61,6 +141,9 @@ function Forum() {
 	if (error) {
 		return <div className="text-center text-red-500">Error: {error}</div>;
 	}
+
+	const topPosts = Array.isArray(posts) ? posts.slice(0, 3) : [];
+	const allPosts = Array.isArray(posts) ? posts.slice(3) : [];
 
 	return (
 		<div className="max-w-6xl mx-auto p-4">
@@ -94,7 +177,6 @@ function Forum() {
 						})}
 					</div>
 
-					{/* All Posts Section with Button */}
 					<div className="flex justify-between items-center mb-4">
 						<h2 className="text-2xl font-semibold">All Posts</h2>
 						<button
@@ -105,7 +187,6 @@ function Forum() {
 						</button>
 					</div>
 
-					{/* New Post Modal */}
 					<NewPostModal
 						isOpen={isModalOpen}
 						onClose={handleCloseModal}
@@ -114,7 +195,13 @@ function Forum() {
 
 					<div className="space-y-4">
 						{allPosts.map((post) => {
-							const { post: postDetails, user, screenshot } = post || {};
+							const {
+								post: postDetails,
+								user,
+								screenshot,
+								isLiked,
+								likes_count,
+							} = post || {};
 							return (
 								<div
 									key={postDetails?.post_id}
@@ -126,7 +213,7 @@ function Forum() {
 											screenshot?.image_path ||
 											"https://via.placeholder.com/150"
 										}
-										alt={postDetails?.title || "No Title"}
+										alt={postDetails.title}
 										className="w-16 h-16 object-cover rounded-md"
 									/>
 									<div className="w-full">
@@ -137,8 +224,23 @@ function Forum() {
 											Posted By: {user?.username || "Anonymous"}
 										</p>
 										<p className="text-sm text-gray-800">
-											{postDetails?.content || "No Content"}
+											{postDetails.content}
 										</p>
+									</div>
+									<div className="flex items-center space-x-2">
+										<button
+											onClick={(e) => {
+												e.stopPropagation();
+												toggleLike(postDetails.post_id);
+											}}
+										>
+											{isLiked ? (
+												<FaHeart className="text-red-500" />
+											) : (
+												<FaRegHeart />
+											)}
+										</button>
+										<span>{likes_count}</span>
 									</div>
 								</div>
 							);
