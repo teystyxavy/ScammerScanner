@@ -2,7 +2,6 @@ import os
 from flask import Flask, jsonify, request
 from PIL import Image
 from app.services import *
-from .views import views
 from .db_setup import create_database, insert_dummy_data
 # from app.config import Config
 from flask_cors import CORS
@@ -64,8 +63,6 @@ def create_app():
     # Register blueprints
     from .routes import main
     app.register_blueprint(main)
-
-    app.register_blueprint(views, url_prefix='/')
 
     return app
 

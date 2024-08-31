@@ -21,6 +21,7 @@ function NewPostModal({ isOpen, onClose, onPostCreated }) {
     }
 
     try {
+      // Create the new post
       const response = await fetch("/api/posts", {
         method: "POST",
         body: formData,
@@ -29,6 +30,19 @@ function NewPostModal({ isOpen, onClose, onPostCreated }) {
       if (response.ok) {
         const newPost = await response.json();
         onPostCreated(newPost);
+
+        // Add 50 points to the user
+        const addPointsResponse = await fetch(`/api/user/${newPost.user_id}/add_points`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ points: 50 }),
+        });
+
+        if (!addPointsResponse.ok) {
+          console.error("Failed to add points");
+        }
       } else {
         const errorData = await response.json();
         setError(errorData.error || "Failed to create post");
@@ -64,8 +78,8 @@ function NewPostModal({ isOpen, onClose, onPostCreated }) {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              rows="10" // Increase the number of rows to make the textarea bigger
-              style={{ height: '150px' }} // Optional: Adjust the height further if needed
+              rows="10"
+              style={{ height: '150px' }}
               required
             ></textarea>
           </div>
