@@ -20,7 +20,7 @@ function Profile() {
 			try {
 				const response = await fetch("/api/current_user", {
 					method: "GET",
-					credentials: "include", // Include cookies (sessions) with the request
+					credentials: "include",
 				});
 
 				if (response.ok) {
@@ -29,7 +29,6 @@ function Profile() {
 					setUsername(userData.username);
 					setEmail(userData.email);
 				} else {
-					// If no user is found, redirect to the login page
 					navigate("/login");
 				}
 			} catch (err) {
@@ -45,15 +44,12 @@ function Profile() {
     try {
       const response = await fetch('/logout', {
         method: 'POST',
-        credentials: 'include', // Include session cookies
+        credentials: 'include',
       });
   
       if (response.ok) {
-        // Clear user data from localStorage
         localStorage.removeItem('isLogged');
         window.dispatchEvent(new Event('storage'));
-  
-        // Redirect to the login page
         navigate('/login');
       } else {
         console.error('Failed to log out');
@@ -89,7 +85,7 @@ function Profile() {
 				const updatedUser = await response.json();
 				setProfileSuccess("Profile updated successfully.");
 				setProfileError("");
-				setProfileCurrentPassword(""); // Clear the current password field
+				setProfileCurrentPassword("");
 			} else {
 				const errorData = await response.json();
 				setProfileSuccess("");
@@ -131,7 +127,7 @@ function Profile() {
 			if (response.ok) {
 				setPasswordSuccess("Password updated successfully.");
 				setPasswordError("");
-				setPasswordCurrentPassword(""); // Clear the current password field
+				setPasswordCurrentPassword("");
 				setNewPassword("");
 				setConfirmPassword("");
 			} else {

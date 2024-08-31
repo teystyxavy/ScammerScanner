@@ -15,13 +15,9 @@ function NavBar() {
       }
     };
 
-    // Check login status on component mount
     checkLoginStatus();
 
-    // Add event listener for localStorage changes
     window.addEventListener('storage', checkLoginStatus);
-
-    // Cleanup listener on component unmount
     return () => {
       window.removeEventListener('storage', checkLoginStatus);
     };

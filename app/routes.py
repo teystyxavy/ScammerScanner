@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify, session, abort
-import json
 import sqlite3
 from werkzeug.utils import secure_filename
 import os
@@ -9,6 +8,7 @@ main = Blueprint('main', __name__)
 DATA_FILE = 'app/data.json'
 
 DB_NAME = "ScamDetectorDB.db"
+
 # Helper function to get a database connection
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
@@ -79,6 +79,7 @@ def create_post():
         'post_id': new_post_id,
         'user_id': user_id,
         'content': content,
+        'title' : title,
         'screenshot_id': screenshot_id
     }
 
@@ -441,6 +442,28 @@ def get_rewards():
 
     return jsonify(rewards_list), 200
 
+# Get points of user
+@main.route('/api/user/points', methods=['GET'])
+def get_user_points():
+    if 'user_id' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+    
+    user_id = session['user_id']
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Query to get the user's points
+    cur.execute('SELECT points FROM Users WHERE user_id = ?', (user_id,))
+    user = cur.fetchone()
+    conn.close()
+
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    points = user['points']
+    return jsonify({"points": points}), 200
+
+
 # Claim Reward
 @main.route('/api/claim_reward', methods=['POST'])
 def claim_reward():
@@ -631,4 +654,37 @@ def create_comment(post_id):
     }
 
     return jsonify(new_comment), 201
+
+# Add points
+@main.route('/api/user/<int:user_id>/add_points', methods=['POST'])
+def add_points(user_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not request.json or 'points' not in request.json:
+        return jsonify({"error": "Points amount is required"}), 400
+
+    points_to_add = request.json.get('points')
+
+    if not isinstance(points_to_add, int) or points_to_add <= 0:
+        return jsonify({"error": "Invalid points amount"}), 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute('SELECT points FROM Users WHERE user_id = ?', (user_id,))
+    user = cur.fetchone()
+
+    if user is None:
+        conn.close()
+        return jsonify({"error": "User not found"}), 404
+
+    current_points = user['points']
+    new_points = current_points + points_to_add
+
+    cur.execute('UPDATE Users SET points = ? WHERE user_id = ?', (new_points, user_id))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": f"{points_to_add} points added successfully", "new_points": new_points}), 200
 

@@ -147,9 +147,9 @@ def insert_dummy_data():
     cur.execute('''
     INSERT INTO Users (username, email, password, points)
     VALUES 
-    ('john', 'john@gmail.com', 'pass', 1640),
-    ('bryan', 'bryan@gmail.com', 'pass', 530),
-    ('elle', 'elle@gmail.com', 'pass', 200)
+    ('philiplovesLOL', 'philip.leong@gmail.com', 'iloveLOL', 1640),
+    ('xavytey', 'xavier.tey@gmail.com', 'p!nk!5myf4vouritecolour', 530),
+    ('jonathan_koh', 'jon.koh@gmail.com', 'iwenttoOCS', 200)
     ''')
 
     # Insert data into Screenshots table
@@ -157,8 +157,8 @@ def insert_dummy_data():
     INSERT INTO Screenshots (user_id, image_path, analyzed_text, scam_status, analysis_result)
     VALUES
     (1, '/images/lottery.png', 'Dear user, you have won $1,000,000. Click here to claim your prize.', 'RED', 'Suspicious links and foreign address detected.'),
-    (2, '/images/package.jpeg', 'Your package has been shipped. Track it here.', 'GREEN', 'No suspicious elements detected.'),
-    (3, '/images/iras.jpg', 'You are eligible for a tax refund. Provide your bank details.', 'RED', 'Foreign address and request for sensitive information detected.')
+    (2, '/images/package.jpeg', 'Your Shopee package has been shipped. Track it here.', 'GREEN', 'No suspicious elements detected.'),
+    (3, '/images/iras.jpg', 'You are eligible for a GST refund. Provide your bank details.', 'RED', 'Foreign address and request for sensitive information detected.')
     ''')
 
     # Insert data into ScamTemplates table
@@ -183,18 +183,18 @@ def insert_dummy_data():
     cur.execute('''
     INSERT INTO CommunityPosts (user_id, screenshot_id, title, content, category)
     VALUES
-    (1, 1, 'Lottery Scam Warning', 'Watch out for this scam message claiming you have won a lottery! This kind of message is a common tactic used by scammers to lure people into giving away their personal information. They often promise a huge prize but will ask you to provide sensitive information or pay a fee to claim it. Always be skeptical of such messages, especially if they come from unknown sources.', 'Scam Alert'),
-    (2, NULL, 'Suspicious Bank Message', 'Is it safe to click on links in text messages from unknown numbers? I received a message that looks like it might be from my bank, but the URL is unfamiliar. I’m hesitant to click on it because I’ve heard about phishing scams. Does anyone have advice on how to verify if a link is safe?', 'Discussion'),
-    (3, 3, 'Tax Refund Scam Concern', 'I received a message about a tax refund. Should I be concerned? The message states that I am eligible for a tax refund and asks me to provide my bank details to process the refund. It looks legitimate, but I am wary because I know there are many scams related to taxes. Has anyone encountered something similar?', 'Scam Alert'),
-    (1, NULL, 'IRS Phone Scam', 'Received a call claiming to be from the IRS demanding immediate payment. They said I owed back taxes and that I would be arrested if I didn’t pay right away. I’ve never heard of the IRS operating this way, but it was very intimidating. Does anyone know if this is a known scam?', 'Scam Alert'),
-    (2, 2, 'Shipped Package', 'Has anyone else received a suspicious text or email about a package delivery? I got a message this morning claiming that a package is waiting for me, but the link they provided looks really suspicious. It said I needed to click to arrange for redelivery or confirm my address, but I’m not expecting any packages. I''ve heard this could be a scam where they trick you into providing personal information or even install malware on your device. Be careful!', 'Scam Alert')
+    (1, 1, 'TOTO Lottery Scam Warning', 'Watch out for this scam message claiming you have won TOTO! This kind of message is a common tactic used by scammers to lure people into giving away their personal information. They often promise a huge prize but will ask you to provide sensitive information or pay a fee to claim it. Always be skeptical of such messages, especially if they come from unknown sources.', 'Scam Alert'),
+    (2, NULL, 'Suspicious UOB Bank Message', 'Is it safe to click on links in text messages from unknown numbers? I received a message that looks like it might be from UOB, but the URL is unfamiliar. I’m scared to click on it sia. I’ve heard about phishing scams. How do you verify if a link is safe?', 'Discussion'),
+    (3, 3, 'GST Refund Scam Concern', 'I received a message about a GST refund. Should I be concerned? The message states that I am eligible for a GST refund and asks me to provide my bank details to process the refund. It looks legitimate, but I am wary because I know there are many scams related to taxes. Has anyone encountered something similar?', 'Scam Alert'),
+    (1, NULL, 'IRAS Phone Scam', 'Received a call claiming to be from the IRAS demanding immediate payment. They said I owed back taxes and that I would be arrested if I didn’t pay right away. I’ve never heard of the IRAS operating this way, but it was very intimidating. Does anyone know if this is a known scam?', 'Scam Alert'),
+    (2, 2, 'Random Shipped Shopee Package', 'Anyone got a suspicious text or email about a package delivery? I got a message this morning claiming that a package is waiting for me, but the link they provided looks real sus... It said I needed to click to arrange for redelivery or confirm my address, but I’m not expecting any packages. I think this could be a scam where they trick you into providing personal information or even install malware on your device. Be careful ah!', 'Scam Alert')
     ''')
 
     # Insert data into Comments table
     cur.execute('''
     INSERT INTO Comments (post_id, user_id, comment_text)
     VALUES
-    (1, 2, 'Thanks for the warning! I almost fell for it.'),
+    (1, 2, 'Wah thanks for the warning! I almost fell for it sia :('),
     (2, 1, 'Always be cautious. Never click on links from unknown senders.'),
     (3, 1, 'Hm....')
     ''')
