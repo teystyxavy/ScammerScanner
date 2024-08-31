@@ -18,7 +18,7 @@ function Register() {
 		}
 
 		try {
-			const response = await fetch("http://localhost:5000/register", {
+			const response = await fetch("/register", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -27,11 +27,10 @@ function Register() {
 			});
 
 			if (response.ok) {
-				// Optionally, you could log in the user directly after registration
 				const data = await response.json();
 				localStorage.setItem("isLogged", "true");
 				window.dispatchEvent(new Event("storage"));
-				navigate("/"); // Redirect to home after successful registration
+				navigate("/");
 			} else {
 				const errorData = await response.json();
 				setError(errorData.error || "Registration failed");

@@ -7,6 +7,7 @@ function PostDetail({ post, onClose }) {
   const [isLiked, setIsLiked] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const fetchLikesData = async () => {
@@ -63,7 +64,14 @@ function PostDetail({ post, onClose }) {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
 
+    const isLogged = localStorage.getItem('isLogged');
+    if (!isLogged) {
+      setErrorMessage('You must be logged in to post a comment.');
+      return;
+    }
+
     if (newComment.trim() === '') {
+      setErrorMessage('Comment cannot be empty.');
       return;
     }
 
@@ -81,11 +89,12 @@ function PostDetail({ post, onClose }) {
         const addedComment = await response.json();
         setComments([...comments, addedComment]);
         setNewComment('');
+        setErrorMessage(''); // Clear the error message on successful comment submission
       } else {
-        console.error('Failed to add comment');
+        setErrorMessage('Failed to add comment.');
       }
     } catch (error) {
-      console.error('Error adding comment:', error);
+      setErrorMessage('Error adding comment.');
     }
   };
 
@@ -151,6 +160,7 @@ function PostDetail({ post, onClose }) {
       {/* Add New Comment Section */}
       <section className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Add a Comment</h2>
+        {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
         <form onSubmit={handleCommentSubmit}>
           <textarea
             value={newComment}

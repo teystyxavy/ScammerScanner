@@ -369,7 +369,11 @@ def register():
     cur.execute('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)', 
                 (username, email, password))
     conn.commit()
+    user_id = cur.lastrowid
     conn.close()
+
+    session['user_id'] = user_id
+    session['username'] = username
 
     return jsonify({"message": "User registered successfully"}), 201
 
@@ -400,6 +404,13 @@ def login():
 
     return jsonify({"message": "Logged in successfully"}), 200
 
+# Logout endpoint
+@main.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user_id', None)
+    session.pop('username', None)
+    return jsonify({"message": "Logged out successfully"}), 200
+
 # Get current user
 @main.route('/api/current_user', methods=['GET'])
 def current_user():
@@ -420,13 +431,6 @@ def current_user():
             }), 200
     
     return jsonify({"error": "Not logged in"}), 401
-
-# Logout endpoint
-@main.route('/logout', methods=['POST'])
-def logout():
-    session.pop('user_id', None)
-    session.pop('username', None)
-    return jsonify({"message": "Logged out successfully"}), 200
 
 # Get Rewards
 @main.route('/api/rewards', methods=['GET'])

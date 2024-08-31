@@ -18,7 +18,7 @@ function Profile() {
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
-				const response = await fetch("http//localhost:5000/api/current_user", {
+				const response = await fetch("/api/current_user", {
 					method: "GET",
 					credentials: "include", // Include cookies (sessions) with the request
 				});
@@ -41,13 +41,28 @@ function Profile() {
 		fetchUserData();
 	}, [navigate]);
 
-	const handleLogout = () => {
-		// Clear user data from localStorage
-		localStorage.removeItem("isLogged");
-		window.dispatchEvent(new Event("storage"));
-		// Redirect to the login page
-		navigate("/login");
-	};
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/logout', {
+        method: 'POST',
+        credentials: 'include', // Include session cookies
+      });
+  
+      if (response.ok) {
+        // Clear user data from localStorage
+        localStorage.removeItem('isLogged');
+        window.dispatchEvent(new Event('storage'));
+  
+        // Redirect to the login page
+        navigate('/login');
+      } else {
+        console.error('Failed to log out');
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+  
 
 	const handleProfileSave = async (e) => {
 		e.preventDefault();
