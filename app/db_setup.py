@@ -5,8 +5,6 @@ DB_NAME = "ScamDetectorDB.db"
 def create_database():
     # Establish connection to SQLite database
     con = sqlite3.connect(DB_NAME)
-    
-    # Create a cursor object using the connection
     cur = con.cursor()
     
     # Execute SQL statements to create tables

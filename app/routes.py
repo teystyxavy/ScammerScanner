@@ -16,7 +16,6 @@ def get_db_connection():
     return conn
 
 # Set definitions for File Upload
-# Assuming your routes.py is inside the `app` directory
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Define the relative path from `app` directory to the upload folder
@@ -38,7 +37,6 @@ def create_post():
     title = request.form.get('title')
     content = request.form.get('content')
 
-    # Check if the post data is valid
     if not content:
         return jsonify({"error": "Content is required"}), 400
 
@@ -91,20 +89,16 @@ def create_post():
 def get_post(post_id):
     conn = get_db_connection()
     cur = conn.cursor()
-
-    # Fetch the specific community post by ID, including the title
     cur.execute('SELECT * FROM CommunityPosts WHERE post_id = ?', (post_id,))
     post = cur.fetchone()
     
     if post is None:
         conn.close()
         abort(404)
-    
-    # Fetch the associated user details
+
     cur.execute('SELECT * FROM Users WHERE user_id = ?', (post['user_id'],))
     user = cur.fetchone()
 
-    # Fetch the associated screenshot details if available
     screenshot = None
     if post['screenshot_id'] is not None:
         cur.execute('SELECT * FROM Screenshots WHERE screenshot_id = ?', (post['screenshot_id'],))
@@ -112,10 +106,9 @@ def get_post(post_id):
 
     conn.close()
 
-    # Convert rows to dictionaries
     post_dict = {
         "post_id": post["post_id"],
-        "title": post["title"],  # Include the title
+        "title": post["title"],
         "content": post["content"],
         "category": post["category"],
         "created_at": post["created_at"],
@@ -140,7 +133,6 @@ def get_posts():
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # Fetch all community posts with associated user and screenshot details, including the title
     cur.execute('''
         SELECT 
             p.post_id, p.title, p.content, p.category, p.created_at, p.updated_at, 
@@ -157,13 +149,12 @@ def get_posts():
     posts = cur.fetchall()
     conn.close()
 
-    # Process the data to include user and screenshot details in the response
     results = []
     for post in posts:
         post_dict = {
             "post": {
                 "post_id": post["post_id"],
-                "title": post["title"],  # Include the title
+                "title": post["title"],
                 "content": post["content"],
                 "category": post["category"],
                 "created_at": post["created_at"],
@@ -189,7 +180,7 @@ def get_posts():
 
 
 
-# Update - Update existing community post by ID
+# Update - Update existing community post
 @main.route('/api/posts/<int:post_id>', methods=['PUT'])
 def update_post(post_id):
     conn = get_db_connection()
@@ -214,7 +205,7 @@ def update_post(post_id):
     updated_post['post_id'] = post_id
     return jsonify(updated_post), 200
 
-# Delete - Remove a community post by ID
+# Delete - Remove a community post
 @main.route('/api/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id):
     conn = get_db_connection()
@@ -234,7 +225,7 @@ def delete_post(post_id):
     return '', 204
 
 
-# Get - Get a user details for profile page
+# Get a user details for profile page
 @main.route('/api/user/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     conn = get_db_connection()
@@ -247,7 +238,6 @@ def get_user(user_id):
         conn.close()
         abort(404)
 
-    # put user details from row into dict
     user_dict = {
         "username": user["username"],
         "email": user["email"],
@@ -293,7 +283,6 @@ def update_userDetails(user_id):
     conn.commit()
     conn.close()
 
-    # Return the updated user details (excluding password)
     updated_user = {
         'user_id': user_id,
         'username': updated_user['username'],
@@ -365,7 +354,6 @@ def register():
         conn.close()
         return jsonify({"error": "Username or email already exists"}), 400
 
-    # Insert the new user into the database without hashing the password
     cur.execute('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)', 
                 (username, email, password))
     conn.commit()
@@ -390,7 +378,6 @@ def login():
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # Find the user by username
     cur.execute('SELECT * FROM Users WHERE username = ?', (username,))
     user = cur.fetchone()
     conn.close()
@@ -438,13 +425,11 @@ def get_rewards():
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # Fetch and sort rewards based on points_required in ascending order
     cur.execute('SELECT * FROM Rewards ORDER BY points_required ASC')
     rewards = cur.fetchall()
 
     conn.close()
 
-    # Convert to dictionary format
     rewards_list = []
     for reward in rewards:
         rewards_list.append({
@@ -568,7 +553,7 @@ def get_post_likes(post_id):
         return jsonify({
             "post_id": post_id,
             "likes_count": result['likes_count'],
-            "isLiked": bool(user_liked['is_liked'])  # Convert to boolean (will be False if user_liked['is_liked'] is 0)
+            "isLiked": bool(user_liked['is_liked'])
         }), 200
     else:
         return jsonify({"error": "Post not found"}), 404
@@ -614,11 +599,9 @@ def create_comment(post_id):
     user_id = session['user_id']
     comment_text = request.json.get('comment_text')
 
-    # Check if the comment text is provided
     if not comment_text:
         return jsonify({"error": "Comment text is required"}), 400
 
-    # Insert the new comment into the Comments table
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('''
