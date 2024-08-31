@@ -1,12 +1,10 @@
 import os
-
 from flask import Flask, jsonify, request
-import sqlite3
 from PIL import Image
 from app.services import *
 from .views import views
 from .db_setup import create_database, insert_dummy_data
-from app.config import Config
+# from app.config import Config
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -59,8 +57,8 @@ def create_app():
     if not os.path.exists(DB_NAME):
         create_database()
         insert_dummy_data()
-    
-    # Config settings
+
+    from app.config import Config
     app.config.from_object(Config)
 
     # Register blueprints
