@@ -217,8 +217,6 @@ def get_user(user_id):
 # Update - Update a user details for profile page
 # updates username, eail and updated_at for specific user_id
 # doesn't update points, password & created_at
-from flask import request, jsonify, abort, session
-
 @main.route('/api/user/<int:user_id>', methods=['PUT'])
 def update_userDetails(user_id):
     conn = get_db_connection()
@@ -298,6 +296,27 @@ def update_userPassword():
     conn.close()
     
     return jsonify({"message": "Password updated successfully"}), 200
+
+# Get User Points
+@main.route('/api/user/points', methods=['GET'])
+def get_user_points():
+    if 'user_id' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+    
+    user_id = session['user_id']
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Query to get the user's points
+    cur.execute('SELECT points FROM Users WHERE user_id = ?', (user_id,))
+    user = cur.fetchone()
+    conn.close()
+
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    points = user['points']
+    return jsonify({"points": points}), 200
 
 # Register endpoint
 @main.route('/register', methods=['POST'])
@@ -383,3 +402,76 @@ def logout():
     session.pop('username', None)
     return jsonify({"message": "Logged out successfully"}), 200
 
+# Get Rewards
+@main.route('/api/rewards', methods=['GET'])
+def get_rewards():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Fetch and sort rewards based on points_required in ascending order
+    cur.execute('SELECT * FROM Rewards ORDER BY points_required ASC')
+    rewards = cur.fetchall()
+
+    conn.close()
+
+    # Convert to dictionary format
+    rewards_list = []
+    for reward in rewards:
+        rewards_list.append({
+            "reward_id": reward["reward_id"],
+            "reward_name": reward["reward_name"],
+            "points_required": reward["points_required"],
+            "image_url": reward["image_url"]
+        })
+
+    return jsonify(rewards_list), 200
+
+# Claim Reward
+@main.route('/api/claim_reward', methods=['POST'])
+def claim_reward():
+    if 'user_id' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session['user_id']
+    reward_id = request.json.get('reward_id')
+
+    if not reward_id:
+        return jsonify({"error": "Reward ID is required"}), 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Get the user's points
+    cur.execute('SELECT points FROM Users WHERE user_id = ?', (user_id,))
+    user = cur.fetchone()
+
+    if not user:
+        conn.close()
+        return jsonify({"error": "User not found"}), 404
+
+    user_points = user['points']
+
+    # Get the reward details
+    cur.execute('SELECT points_required FROM Rewards WHERE reward_id = ?', (reward_id,))
+    reward = cur.fetchone()
+
+    if not reward:
+        conn.close()
+        return jsonify({"error": "Reward not found"}), 404
+
+    points_required = reward['points_required']
+
+    if user_points < points_required:
+        conn.close()
+        return jsonify({"error": "Not enough points to claim this reward"}), 400
+
+    # Deduct points from the user
+    cur.execute('UPDATE Users SET points = points - ? WHERE user_id = ?', (points_required, user_id))
+
+    # Record the claimed reward
+    cur.execute('INSERT INTO User_Rewards (user_id, reward_id) VALUES (?, ?)', (user_id, reward_id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Reward claimed successfully"}), 200
