@@ -23,15 +23,15 @@ Authentication is required for most of the endpoints. A user session is maintain
 - **Method:** `POST`
 - **Authentication:** Required
 - **Request Parameters:**
-  - `title`: The title of the post (form-data)
-  - `content`: The content of the post (form-data)
-  - `screenshot`: (optional) An image file (form-data)
+  - `title`: The title of the post
+  - `content`: The content of the post
+  - `screenshot`: (optional) An image file
 - **Response:**
   - `201 Created`: Returns the details of the newly created post.
   - `401 Unauthorized`: If the user is not logged in.
   - `400 Bad Request`: If required fields are missing.
 
-#### Get a Post by ID
+#### Get a Post
 
 - **URL:** `/api/posts/<int:post_id>`
 - **Method:** `GET`
