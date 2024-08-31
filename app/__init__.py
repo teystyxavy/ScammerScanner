@@ -30,11 +30,21 @@ def check_scam():
     text = parse_text.extract_text(image)
 
     first_check = ScamFirstCheckService(text=text)
-    malicious = first_check.check_scam()
+    first_check_results = first_check.check_scam()
+
+    second_check_results = False
+    second_check_is_scam = False
+    if first_check_results == False:
+        second_check = ScamSecondCheckService()
+        second_check_results = second_check.check_text(text)
+        second_check_is_scam = second_check.is_scam
+
 
     res = jsonify({
         'content' : text,
-        'malicious' : malicious,
+        'first_check' : first_check_results,
+        'second_check_results' : second_check_results,
+        'second_check_is_scam' : second_check_is_scam,
         'message' : "successfully transmitted",
         'status' : "success"
     })
