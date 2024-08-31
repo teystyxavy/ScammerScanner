@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, session, abort
 import json
 import sqlite3
+from werkzeug.utils import secure_filename
+import os
 ## from .models import MyModel
 
 main = Blueprint('main', __name__)
@@ -13,35 +15,77 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row  # This allows fetching rows as dictionaries
     return conn
 
-# helper function to load & save data
-def load_data():
-    with open(DATA_FILE, 'r') as file:
-        return json.load(file)
+# Set definitions for File Upload
+# Assuming your routes.py is inside the `app` directory
+basedir = os.path.abspath(os.path.dirname(__file__))
 
-def save_data(data):
-    with open(DATA_FILE, 'w') as file:
-        json.dump(data, file, indent=4)
+# Define the relative path from `app` directory to the upload folder
+UPLOAD_FOLDER = os.path.join(basedir, '../frontend/react-project/public/images')
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # CRUD - Create, Read, Update, Delete
-
 # Create - Add new community post
 @main.route('/api/posts', methods=['POST'])
 def create_post():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = session['user_id']
+    title = request.form.get('title')
+    content = request.form.get('content')
+
+    # Check if the post data is valid
+    if not content:
+        return jsonify({"error": "Content is required"}), 400
+
+    screenshot_id = None
+    if 'screenshot' in request.files:
+        file = request.files['screenshot']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepath)
+
+            relative_path = f'/images/{filename}'
+
+            conn = get_db_connection()
+            cur = conn.cursor()
+            
+            # Insert the screenshot into the Screenshots table along with user_id
+            cur.execute('''
+                INSERT INTO Screenshots (user_id, image_path, scam_status)
+                VALUES (?, ?, ?)
+            ''', (user_id, relative_path, 'RED'))
+            
+            conn.commit()
+            screenshot_id = cur.lastrowid
+            conn.close()
+
+    # Insert the post into the CommunityPosts table
     conn = get_db_connection()
     cur = conn.cursor()
-    
-    new_post = request.json
     cur.execute('''
-        INSERT INTO CommunityPosts (user_id, screenshot_id, content, category)
-        VALUES (?, ?, ?, ?)
-    ''', (new_post['user_id'], new_post.get('screenshot_id'), new_post['content'], new_post['category']))
-    
+        INSERT INTO CommunityPosts (user_id, screenshot_id, content, title, category)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (user_id, screenshot_id, content, title, 'Discussion'))
+
     conn.commit()
     new_post_id = cur.lastrowid
     conn.close()
 
-    new_post['post_id'] = new_post_id
+    new_post = {
+        'post_id': new_post_id,
+        'user_id': user_id,
+        'content': content,
+        'screenshot_id': screenshot_id
+    }
+
     return jsonify(new_post), 201
+
 
 @main.route('/api/posts/<int:post_id>', methods=['GET'])
 def get_post(post_id):
@@ -356,6 +400,7 @@ def login():
 
     return jsonify({"message": "Logged in successfully"}), 200
 
+# Get current user
 @main.route('/api/current_user', methods=['GET'])
 def current_user():
     if 'user_id' in session:

@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import PostCard from "./PostCard";
 import PostDetail from "./PostDetail";
+import NewPostModal from "./NewPostModal"; // Import the new modal component
 
 function Forum() {
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
 
   useEffect(() => {
-    // Fetch posts data from the backend API
     const fetchPosts = async () => {
       try {
         const response = await fetch("/api/posts");
@@ -36,6 +37,19 @@ function Forum() {
     setSelectedPost(null);
   };
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handlePostCreated = (newPost) => {
+    setPosts([newPost, ...posts]);
+    setIsModalOpen(false);
+  };
+
   // Separate prominent (top 3) posts and remaining posts
   const topPosts = posts.slice(0, 3);
   const allPosts = posts.slice(3);
@@ -56,7 +70,6 @@ function Forum() {
         <>
           <h1 className="text-3xl font-bold text-center mb-8">Recent Scams</h1>
 
-          {/* Top 3 Prominent Posts with Fixed Height */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {topPosts.map((post) => {
               const { post: postDetails, user, screenshot } = post || {};
@@ -78,8 +91,24 @@ function Forum() {
             })}
           </div>
 
-          {/* All Posts Section */}
-          <h2 className="text-2xl font-semibold text-center mb-4">All Posts</h2>
+          {/* All Posts Section with Button */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold">All Posts</h2>
+            <button
+              className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+              onClick={handleOpenModal}
+            >
+              Create New Post
+            </button>
+          </div>
+
+          {/* New Post Modal */}
+          <NewPostModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            onPostCreated={handlePostCreated}
+          />
+
           <div className="space-y-4">
             {allPosts.map((post) => {
               const { post: postDetails, user, screenshot } = post || {};
