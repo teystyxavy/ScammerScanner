@@ -21,6 +21,7 @@ function App() {
 
 	function handleFileReset() {
 		setFile(null);
+		setOutput(null);
 	}
 
 	return (
@@ -34,12 +35,18 @@ function App() {
 							element={
 								<section className="min-h-screen flex flex-col">
 									{output ? (
-										<Result />
+										<Result
+											result={output}
+											file={file}
+											onReset={handleFileReset}
+										/>
 									) : loading ? (
 										<Loading />
 									) : isFileAvailable ? (
 										<FileDisplay
 											handleFileReset={handleFileReset}
+											setOutput={setOutput}
+											setLoading={setLoading}
 											file={file}
 										/>
 									) : (

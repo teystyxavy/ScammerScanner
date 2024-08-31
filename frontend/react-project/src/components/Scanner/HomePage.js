@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React from "react";
 
 export default function HomePage(props) {
 	const { file, setFile } = props;
@@ -23,7 +23,7 @@ export default function HomePage(props) {
 					accept=".pdf, .png"
 				></input>
 				<p className="text-blue-400">Detect Now</p>
-				<i class="fa-regular fa-image"></i>
+				<i className="fa-regular fa-image"></i>
 			</label>
 			<p className="italic text-slate-400">Protect Yourself Today</p>
 		</main>

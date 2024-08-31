@@ -1,8 +1,8 @@
-import React,{ Component } from "react";
+import React from "react";
 
 export default function FileDisplay(props) {
-	const url = "/upload";
-	const { handleFileReset, file } = props;
+	const url = "http://localhost:5000/upload";
+	const { handleFileReset, file, setOutput, setLoading } = props;
 
 	const handleFileUpload = async () => {
 		if (!file) {
@@ -11,9 +11,10 @@ export default function FileDisplay(props) {
 		}
 
 		const formData = new FormData();
-		formData.append("file", file);
+		formData.append("files[]", file);
 
 		try {
+			setLoading(true); // Start loading
 			const response = await fetch(url, {
 				method: "POST",
 				body: formData,
@@ -22,9 +23,16 @@ export default function FileDisplay(props) {
 			if (!response.ok) {
 				throw new Error("File upload failed");
 			}
+			const data = await response.json();
+
+			// Assuming the server returns a JSON object with the detection results
+			console.log("File uploaded successfully:", data);
+			setOutput(data); // Update the output state with the detection result
 		} catch (error) {
 			console.error("Error uploading file: ", error);
 			alert("Error uploading file");
+		} finally {
+			setLoading(false); // Stop loading
 		}
 	};
 
@@ -49,7 +57,7 @@ export default function FileDisplay(props) {
 					className="specialBtn px-3 p-2 rounded-lg text-blue-400 flex items-center gap-2 font-medium"
 				>
 					<p>Detect</p>
-					<i class="fa-solid fa-user-secret"></i>
+					<i className="fa-solid fa-user-secret"></i>
 				</button>
 			</div>
 		</main>
