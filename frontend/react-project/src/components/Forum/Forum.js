@@ -16,7 +16,7 @@ function Forum() {
 		// Fetch current user data
 		const fetchUser = async () => {
 			try {
-				const response = await fetch("/api/current_user", {
+				const response = await fetch("http://localhost:5000/api/current_user", {
 					credentials: "include",
 				});
 				if (response.ok) {
@@ -36,7 +36,7 @@ function Forum() {
 	useEffect(() => {
 		const fetchPosts = async () => {
 			try {
-				const response = await fetch("/api/posts");
+				const response = await fetch("http://localhost:5000/api/posts");
 				if (!response.ok) {
 					throw new Error("Failed to fetch posts");
 				}
@@ -59,7 +59,9 @@ function Forum() {
 			posts.map(async (post) => {
 				const postId = post.post.post_id;
 				try {
-					const response = await fetch(`/api/posts/${postId}/likes`);
+					const response = await fetch(
+						`http://localhost:5000/api/posts/${postId}/likes`
+					);
 					if (response.ok) {
 						const likesData = await response.json();
 						return {
@@ -106,10 +108,13 @@ function Forum() {
 
 	const toggleLike = async (postId) => {
 		try {
-			const response = await fetch(`/api/posts/${postId}/toggle_like`, {
-				method: "POST",
-				credentials: "include", // Include session cookies
-			});
+			const response = await fetch(
+				`http://localhost:5000/api/posts/${postId}/toggle_like`,
+				{
+					method: "POST",
+					credentials: "include", // Include session cookies
+				}
+			);
 
 			if (response.ok) {
 				// Update the post's like count and liked status

@@ -41,7 +41,7 @@ function App() {
 											onReset={handleFileReset}
 										/>
 									) : loading ? (
-										<Loading />
+										<Loading file={file} />
 									) : isFileAvailable ? (
 										<FileDisplay
 											handleFileReset={handleFileReset}

@@ -1,6 +1,28 @@
 import React from "react";
 
 export default function Result({ result, file, onReset }) {
+	const spellingCheck = result.first_check;
+	const isInTheDatabase = result.second_check_results;
+	const text_classification = result.second_check_is_scam;
+
+	// result = {
+	// 	first_check: false,
+	// 	second_check_results: true,
+	// 	second_check_is_scam: true,
+	// };
+
+	var colour = "G";
+
+	if (spellingCheck) {
+		colour = "R";
+	} else if (isInTheDatabase) {
+		colour = "Y";
+	} else if (text_classification) {
+		colour = "R";
+	} else {
+		colour = "G";
+	}
+
 	return (
 		<div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-lg w-full max-w-md mx-auto my-9">
 			<h2 className="font-semibold text-3xl mb-4 text-blue-500">
@@ -20,57 +42,64 @@ export default function Result({ result, file, onReset }) {
 					</div>
 				</div>
 				<div className="mb-4">
-					<h3 className="font-medium text-lg">First Check:</h3>
+					<h3 className="font-medium text-lg">
+						Spelling and Malicious Links Test
+					</h3>
 					<p
 						className={`p-2 rounded-md ${
-							result.first_check
+							!result.first_check
 								? "bg-green-100 text-green-600"
 								: "bg-red-100 text-red-600"
 						}`}
 					>
-						{result.first_check ? "Passed" : "Failed"}
+						{!result.first_check ? "Passed" : "Failed"}
 					</p>
 				</div>
+				{!result.first_check && (
+					<div className="mb-4">
+						<h3 className="font-medium text-lg">In our database?</h3>
+						<p
+							className={`p-2 rounded-md ${
+								result.second_check_is_scam
+									? "bg-red-100 text-red-600"
+									: "bg-green-100 text-green-600"
+							}`}
+						>
+							{result.second_check_is_scam ? "Yes" : "No"}
+						</p>
+					</div>
+				)}
+
+				{result.second_check_results && (
+					<div className="mb-4">
+						<h3 className="font-medium text-lg">Text Classification</h3>
+						<p
+							className={`p-2 rounded-md ${
+								result.second_check_results
+									? "bg-red-100 text-red-600"
+									: "bg-green-100 text-green-600"
+							}`}
+						>
+							{result.second_check_results ? "Failed" : "Passed"}
+						</p>
+					</div>
+				)}
 				<div className="mb-4">
-					<h3 className="font-medium text-lg">Second Check (Is Scam?):</h3>
+					<h3 className="font-medium text-lg">Final Result:</h3>
 					<p
 						className={`p-2 rounded-md ${
-							result.second_check_is_scam
-								? "bg-red-100 text-red-600"
-								: "bg-green-100 text-green-600"
-						}`}
-					>
-						{result.second_check_is_scam ? "Scam Detected" : "No Scam Detected"}
-					</p>
-				</div>
-				<div className="mb-4">
-					<h3 className="font-medium text-lg">Second Check Results:</h3>
-					<p
-						className={`p-2 rounded-md ${
-							result.second_check_results
-								? "bg-red-100 text-red-600"
-								: "bg-green-100 text-green-600"
-						}`}
-					>
-						{result.second_check_results ? "Failed" : "Passed"}
-					</p>
-				</div>
-				<div className="mb-4">
-					<h3 className="font-medium text-lg">Status:</h3>
-					<p
-						className={`p-2 rounded-md ${
-							result.status === "success"
+							colour === "G"
 								? "bg-green-100 text-green-600"
-								: "bg-red-100 text-red-600"
+								: colour === "R"
+								? "bg-red-100 text-red-600"
+								: "bg-yellow-100 text-yellow-600"
 						}`}
 					>
-						{result.status === "success" ? "Success" : "Error"}
-					</p>
-				</div>
-				<div className="mt-4">
-					<h3 className="font-medium text-lg">Message:</h3>
-					<p className="text-gray-700 bg-gray-100 p-2 rounded-md">
-						{result.message || "No message provided"}
+						{colour === "G"
+							? "Not a Scam"
+							: colour === "R"
+							? "It is a Scam"
+							: "Cannot Determine"}
 					</p>
 				</div>
 			</div>
