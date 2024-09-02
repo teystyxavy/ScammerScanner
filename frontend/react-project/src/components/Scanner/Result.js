@@ -15,7 +15,7 @@ export default function Result({ result, file, onReset }) {
 
 	if (spellingCheck) {
 		colour = "R";
-	} else if (isInTheDatabase) {
+	} else if (!isInTheDatabase) {
 		colour = "Y";
 	} else if (text_classification) {
 		colour = "R";
@@ -55,32 +55,32 @@ export default function Result({ result, file, onReset }) {
 						{!result.first_check ? "Passed" : "Failed"}
 					</p>
 				</div>
-				{!result.first_check && (
+				{!spellingCheck && (
 					<div className="mb-4">
 						<h3 className="font-medium text-lg">In our database?</h3>
 						<p
 							className={`p-2 rounded-md ${
-								result.second_check_is_scam
-									? "bg-red-100 text-red-600"
+								!isInTheDatabase
+									? "bg-yellow-100 text-yellow-600"
 									: "bg-green-100 text-green-600"
 							}`}
 						>
-							{result.second_check_is_scam ? "Yes" : "No"}
+							{!isInTheDatabase ? "No" : "Yes"}
 						</p>
 					</div>
 				)}
 
-				{result.second_check_results && (
+				{isInTheDatabase && (
 					<div className="mb-4">
 						<h3 className="font-medium text-lg">Text Classification</h3>
 						<p
 							className={`p-2 rounded-md ${
-								result.second_check_results
+								text_classification
 									? "bg-red-100 text-red-600"
 									: "bg-green-100 text-green-600"
 							}`}
 						>
-							{result.second_check_results ? "Failed" : "Passed"}
+							{text_classification ? "Failed" : "Passed"}
 						</p>
 					</div>
 				)}

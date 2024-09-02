@@ -2,7 +2,7 @@ import sqlite3
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-SIMILARITY_THRESHOLD = 0.7
+SIMILARITY_THRESHOLD = 0.6
 
 class ScamSecondCheckService:
     def __init__(self) -> None:
@@ -16,6 +16,7 @@ class ScamSecondCheckService:
         self.texts = [row[0] for row in data]
         self.scam_statuses = [row[1] for row in data]
         self.is_scam = False
+        self.highest = 0.0
 
         conn.close()
         pass
@@ -38,6 +39,7 @@ class ScamSecondCheckService:
 
         most_similar_score = np.max(similarities)
         most_similar_index = np.argmax(similarities)
+        self.highest = most_similar_score
 
         #check if higher than threshold
         if most_similar_score > SIMILARITY_THRESHOLD:
@@ -48,3 +50,9 @@ class ScamSecondCheckService:
         
         # If not higher, return false as our database not high enough (YELLOW)
         return False
+
+    
+    def get_score(self) -> int:
+        return self.highest
+
+    

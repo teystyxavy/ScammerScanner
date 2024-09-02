@@ -158,7 +158,7 @@ def insert_dummy_data():
     VALUES
     (1, '/images/lottery.png', 'Dear user, you have won $1,000,000. Click here to claim your prize.', 'RED', 'Suspicious links and foreign address detected.'),
     (2, '/images/package.jpeg', 'Your Shopee package has been shipped. Track it here.', 'GREEN', 'No suspicious elements detected.'),
-    (3, '/images/iras.jpg', 'You are eligible for a GST refund. Provide your bank details.', 'RED', 'Foreign address and request for sensitive information detected.')
+    (3, '/images/iras.jpg', 'Ministry of Finance --- Dear Citizen, You are eligible for a GST refund. Provide your bank details.', 'GREEN', 'Foreign address and request for sensitive information detected.')
     ''')
 
     # Insert data into ScamTemplates table

@@ -33,10 +33,14 @@ def check_scam():
 
     second_check_results = False
     second_check_is_scam = False
+    second_Check_debug = 0.0
     if first_check_results == False:
         second_check = ScamSecondCheckService()
         second_check_results = second_check.check_text(text)
         second_check_is_scam = second_check.is_scam
+        second_Check_debug = second_check.highest
+
+    
 
 
     res = jsonify({
@@ -45,7 +49,8 @@ def check_scam():
         'second_check_results' : second_check_results,
         'second_check_is_scam' : second_check_is_scam,
         'message' : "successfully transmitted",
-        'status' : "success"
+        'status' : "success",
+        'score' : second_Check_debug
     })
 
     return res
